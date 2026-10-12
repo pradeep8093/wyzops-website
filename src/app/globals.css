@@ -1,0 +1,450 @@
+@import "tailwindcss";
+
+/* ───────────────────────────── Design tokens ───────────────────────────── */
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+@theme {
+  /* Surfaces */
+  --color-canvas: #05060a;
+  --color-surface: #0a0c12;
+  --color-elevated: #0f121a;
+  --color-raised: #151925;
+
+  /* Text — all pass WCAG AA on canvas */
+  --color-fg: #eef0f5;
+  --color-muted: #a3a9b8;
+  --color-subtle: #7f8696;
+
+  /* Lines */
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+
+  /* Accents */
+  --color-brand-blue: #4f7dff;
+  --color-brand-violet: #8b5cf6;
+  --color-brand-cyan: #22d3ee;
+  --color-brand-sky: #93b4ff;
+
+  --ease-out-soft: cubic-bezier(0.22, 0.7, 0.2, 1);
+
+  --animate-shimmer: shimmer 2.4s ease-in-out infinite;
+}
+
+/* ───────────────────────────── Base ───────────────────────────── */
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
+    scroll-padding-top: 6rem;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: rgb(79 125 255 / 0.35);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-sky);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* ───────────────────────────── Utilities ───────────────────────────── */
+
+@utility container-page {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2rem;
+  }
+}
+
+@utility text-gradient {
+  background-image: linear-gradient(100deg, #8fb0ff 0%, #a78bfa 45%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Subtle technical grid */
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+@utility bg-dots {
+  background-image: radial-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* Fades an element out towards its edges */
+@utility mask-radial {
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+}
+
+@utility mask-fade-b {
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+
+@utility hairline-x {
+  background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.12) 20%, rgb(255 255 255 / 0.12) 80%, transparent);
+}
+
+/* Glass surface */
+@utility glass {
+  background-color: rgb(12 14 21 / 0.6);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+/* ───────────────────────────── Components ───────────────────────────── */
+
+@layer components {
+  /* Card with a cursor-following glow + border highlight.
+     Pointer position is written to --mx/--my by <SiteEffects />. */
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .spotlight::before,
+  .spotlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 400ms var(--ease-out-soft);
+  }
+
+  .spotlight::before {
+    z-index: -1;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgb(79 125 255 / 0.1), transparent 45%);
+  }
+
+  .spotlight::after {
+    padding: 1px;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgb(147 180 255 / 0.55), transparent 60%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+  }
+
+  .spotlight:hover::before,
+  .spotlight:hover::after,
+  .spotlight:focus-visible::before,
+  .spotlight:focus-visible::after {
+    opacity: 1;
+  }
+
+  /* Legal / long-form text */
+  .prose-legal {
+    color: var(--color-muted);
+    line-height: 1.75;
+  }
+
+  .prose-legal h2 {
+    color: var(--color-fg);
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-top: 2.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .prose-legal p,
+  .prose-legal ul {
+    margin-top: 1rem;
+  }
+
+  .prose-legal ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+
+  .prose-legal li + li {
+    margin-top: 0.4rem;
+  }
+
+  .prose-legal a {
+    color: var(--color-brand-sky);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+/* ───────────────────────────── Motion ───────────────────────────── */
+
+/* Scroll reveal — only hides content when JS is running (".js" is set by an
+   inline script in <head>), so the page is fully readable without JS. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 800ms var(--ease-out-soft),
+    transform 800ms var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.js [data-reveal][data-visible] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Hero entrance */
+@keyframes enter {
+  from {
+    opacity: 0.01;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-enter {
+  animation: enter 800ms var(--ease-out-soft) both;
+  animation-delay: var(--enter-delay, 0ms);
+}
+
+/* Data packets travelling along SVG paths (paths use pathLength="100") */
+@keyframes packet {
+  from {
+    stroke-dashoffset: 8;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+@keyframes packet-reverse {
+  from {
+    stroke-dashoffset: -100;
+  }
+  to {
+    stroke-dashoffset: 8;
+  }
+}
+
+.flow-packet {
+  stroke-dasharray: 8 200;
+  stroke-dashoffset: 8;
+  animation: packet var(--dur, 3.2s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.flow-packet-reverse {
+  stroke-dasharray: 8 200;
+  stroke-dashoffset: -100;
+  animation: packet-reverse var(--dur, 3.2s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes march {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.flow-march {
+  stroke-dasharray: 2 8;
+  animation: march 1.4s linear infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.55;
+  }
+  80%,
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.pulse-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulse-ring 2.8s var(--ease-out-soft) infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-slow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin-slow 40s linear infinite;
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.float-y {
+  animation: float-y 6s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.status-dot {
+  animation: blink 2.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgb(255 255 255 / 0.05) 0%, rgb(255 255 255 / 0.1) 50%, rgb(255 255 255 / 0.05) 100%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* Agent trace lines appear one after another once revealed */
+.js [data-reveal] .trace-line {
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 500ms var(--ease-out-soft),
+    transform 500ms var(--ease-out-soft);
+  transition-delay: calc(var(--i, 0) * 450ms + 400ms);
+}
+
+.js [data-reveal][data-visible] .trace-line {
+  opacity: 1;
+  transform: none;
+}
+
+/* Process timeline progress line */
+.js [data-reveal] .timeline-progress {
+  transform: scaleX(0);
+  transition: transform 1600ms var(--ease-out-soft) 200ms;
+}
+
+.js [data-reveal][data-visible] .timeline-progress {
+  transform: scaleX(1);
+}
+
+.js [data-reveal] .timeline-progress-y {
+  transform: scaleY(0);
+  transition: transform 1600ms var(--ease-out-soft) 200ms;
+}
+
+.js [data-reveal][data-visible] .timeline-progress-y {
+  transform: scaleY(1);
+}
+
+/* Pause decorative loops while off-screen (toggled by <SiteEffects />) */
+.js [data-anim]:not([data-inview]) *,
+.js [data-anim]:not([data-inview])::before,
+.js [data-anim]:not([data-inview])::after {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .js [data-reveal],
+  .js [data-reveal] .trace-line {
+    opacity: 1;
+    transform: none;
+  }
+
+  .js [data-reveal] .timeline-progress,
+  .js [data-reveal] .timeline-progress-y {
+    transform: none;
+  }
+
+  .flow-packet,
+  .flow-packet-reverse,
+  .pulse-ring {
+    display: none;
+  }
+}
