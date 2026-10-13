@@ -19,6 +19,17 @@ npm run typecheck            # TypeScript
 
 Requires Node.js 20.9 or newer.
 
+## Coming soon mode
+
+Set `IS_COMING_SOON=true` to put the whole site behind a "Coming soon" screen until launch.
+
+- Every URL (`/`, `/contact`, `/privacy`, unknown paths…) shows only the coming-soon screen. No navbar, footer, page content or structured data is rendered.
+- The contact form's server action refuses submissions.
+- `robots.txt` disallows everything, the sitemap is empty, and every response carries `X-Robots-Tag: noindex, nofollow`.
+- Icons, the manifest and the share image stay reachable so links still preview nicely.
+
+The flag is read at **build time** (`next.config.ts` inlines it), so redeploy after changing it, or restart `next dev` locally. Accepted "on" values: `true`, `1`, `yes`, `on`. Anything else, or unset, means the full site is live.
+
 ## Launch checklist
 
 These are deliberate placeholders. The site doesn't invent anything you haven't given it.

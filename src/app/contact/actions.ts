@@ -1,6 +1,7 @@
 "use server";
 
 import { budgetOptions, helpOptions, projectTypes } from "@/content/contact";
+import { isComingSoon } from "@/lib/coming-soon";
 import { labelFor, readInquiry, validateInquiry, type ContactState, type Inquiry } from "@/lib/contact";
 
 /**
@@ -12,6 +13,11 @@ import { labelFor, readInquiry, validateInquiry, type ContactState, type Inquiry
  * In development with neither configured, inquiries are logged to the server console.
  */
 export async function submitInquiry(_prev: ContactState, formData: FormData): Promise<ContactState> {
+  // The site is gated: the form isn't shown, so refuse direct calls too.
+  if (isComingSoon) {
+    return { status: "error", message: "We're not accepting inquiries through the website yet." };
+  }
+
   // Honeypot: real users never fill this hidden field. Pretend success for bots.
   if (String(formData.get("website") ?? "").length > 0) {
     return { status: "success", email: "" };
